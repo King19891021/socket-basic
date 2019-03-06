@@ -7,8 +7,22 @@ var moment = require('moment');
 
 app.use(express.static(__dirname+'/public'));
 
+var clientInfo = {};
+
 io.on('connection', function (socket) {
     console.log('User connected via socket.io');
+
+    // Message by join room
+    socket.on('joinRoom', function (req) {
+        clientInfo[socket.id] = req;
+
+        socket.join(req.room);
+        socket.broadcast.to(req.room).emit('message', {
+            name: 'System',
+            text: req.name + 'has joined',
+            timestamp: moment().valueOf()
+        })
+    })
 
     // Receiving the message
     socket.on('message', function (message) {
@@ -16,8 +30,11 @@ io.on('connection', function (socket) {
 
         message.timestamp = moment().valueOf();
 
+        // Receiving the message by chatting room
+        io.to(clientInfo[socket.id].room).emit('message', message);
+
         // 주고받은 메세지 
-        io.emit('message', message);
+        // io.emit('message', message);
         // 보낸 메세지
         // socket.broadcast.emit('message', message);
     })
