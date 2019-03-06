@@ -14,7 +14,7 @@ io.on('connection', function (socket) {
         console.log('New message:' + message);
 
         // 주고받은 메세지 
-        // io.emit('message', message);
+        io.emit('message', message);
         // 보낸 메세지
         // socket.broadcast.emit('message', message);
     })
