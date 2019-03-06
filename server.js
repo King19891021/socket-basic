@@ -3,6 +3,7 @@ var PORT = process.env.PORT || 3000;
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var moment = require('moment');
 
 app.use(express.static(__dirname+'/public'));
 
@@ -11,7 +12,9 @@ io.on('connection', function (socket) {
 
     // Receiving the message
     socket.on('message', function (message) {
-        console.log('New message:' + message);
+        console.log('New message:' + message.text);
+
+        message.timestamp = moment().valueOf();
 
         // 주고받은 메세지 
         io.emit('message', message);
@@ -21,7 +24,9 @@ io.on('connection', function (socket) {
 
     // Sending message 
     socket.emit('message', {
-        text: 'Welcome to the chat application'
+        name: 'System',
+        text: 'Welcome to the chat application',
+        timestamp: moment().valueOf()
     })
 })
 
