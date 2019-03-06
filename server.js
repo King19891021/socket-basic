@@ -9,6 +9,28 @@ app.use(express.static(__dirname+'/public'));
 
 var clientInfo = {};
 
+// Send current users to provided socket
+function sendCurrentUsers(socket){
+    var info = clientInfo[socket.id];
+    var users = [];
+
+    if(typeof info === 'undefined'){
+        return;
+    }
+    Object.keys(clientInfo).forEach(function(socketId){
+        var userInfo = clientInfo[socketId];
+        if(info.room === userInfo.room){
+            users.push(userInfo.name);
+        }
+    });
+
+    socket.emit('message', {
+        name: 'System',
+        text: 'Current users:' + users.join(', '),
+        timestamp: moment().valueOf()
+    })
+}
+
 io.on('connection', function (socket) {
     console.log('User connected via socket.io');
 
@@ -44,15 +66,19 @@ io.on('connection', function (socket) {
     socket.on('message', function (message) {
         console.log('New message:' + message.text);
 
-        message.timestamp = moment().valueOf();
-
-        // Receiving the message by chatting room
-        io.to(clientInfo[socket.id].room).emit('message', message);
-
-        // 주고받은 메세지 
-        // io.emit('message', message);
-        // 보낸 메세지
-        // socket.broadcast.emit('message', message);
+        if(message.text === '@currentUsers'){
+            sendCurrentUsers(socket)
+        }
+        else{
+            message.timestamp = moment().valueOf();
+            // Receiving the message by chatting room
+            io.to(clientInfo[socket.id].room).emit('message', message);
+    
+            // 주고받은 메세지 
+            // io.emit('message', message);
+            // 보낸 메세지
+            // socket.broadcast.emit('message', message);
+        }        
     })
 
     // Sending message 
