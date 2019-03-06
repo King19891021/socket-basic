@@ -13,7 +13,10 @@ io.on('connection', function (socket) {
     socket.on('message', function (message) {
         console.log('New message:' + message);
 
-        socket.broadcast.emit('message', message);
+        // 주고받은 메세지 
+        // io.emit('message', message);
+        // 보낸 메세지
+        // socket.broadcast.emit('message', message);
     })
 
     // Sending message 
